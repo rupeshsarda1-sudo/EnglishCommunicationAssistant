@@ -34,7 +34,10 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) startListening()
-        else Snackbar.make(binding.root, "Microphone permission is required for voice input.", Snackbar.LENGTH_LONG).show()
+        else Snackbar.make(binding.root, "Microphone permission is required for voice input.",
+            Snackbar.LENGTH_INDEFINITE)
+            .setAction("Grant") { requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
+            .show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,56 +47,59 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         speechManager = SpeechInputManager(this)
-        setupSpeechCallbacks()
-        observeViewModel()
+        setupSpeechManager()
+        setupObservers()
         setupClickListeners()
     }
 
-    private fun setupSpeechCallbacks() {
+    private fun setupSpeechManager() {
         speechManager.setCallbacks(
-            onResult = { spokenText ->
-                runOnUiThread { viewModel.onSpeechReceived(spokenText) }
-            },
-            onError = { errorMessage ->
-                runOnUiThread { viewModel.onError(errorMessage) }
-            },
-            onStart = {
-                runOnUiThread { viewModel.onListeningStarted() }
-            },
-            onStop = {}
+            onResult = { text -> viewModel.processInput(text) },
+            onError = { error -> viewModel.setError(error) },
+            onStart = { viewModel.setListening() },
+            onStop = { }
         )
     }
 
-    private fun observeViewModel() {
+    private fun setupObservers() {
         viewModel.state.observe(this) { state ->
             when (state) {
                 is AssistantState.Idle -> showIdleState()
                 is AssistantState.Listening -> showListeningState()
                 is AssistantState.Processing -> showProcessingState()
-                is AssistantState.ResultReady -> showResult(state.result)
-                is AssistantState.Error -> showError(state.message)
+                is AssistantState.Result -> showResultState(state.result)
+                is AssistantState.Error -> showErrorState(state.message)
             }
         }
     }
 
     private fun setupClickListeners() {
-        binding.fabMic.setOnClickListener { checkPermissionAndListen() }
-        binding.btnCopyCasual.setOnClickListener { copyToClipboard(binding.tvCasualSuggestion.text.toString(), "Casual") }
-        binding.btnCopyProfessional.setOnClickListener { copyToClipboard(binding.tvProfessionalSuggestion.text.toString(), "Professional") }
-        binding.btnShareCasual.setOnClickListener { shareText(binding.tvCasualSuggestion.text.toString()) }
-        binding.btnReset.setOnClickListener { viewModel.resetState() }
-        binding.btnTypedInput.setOnClickListener { showTypedInputDialog() }
+        binding.fabMic.setOnClickListener { handleMicClick() }
+        binding.btnReset.setOnClickListener {
+            speechManager.stopListening()
+            viewModel.reset()
+        }
+        binding.btnCopyCasual.setOnClickListener {
+            copyToClipboard(binding.tvCasualSuggestion.text.toString())
+        }
+        binding.btnCopyProfessional.setOnClickListener {
+            copyToClipboard(binding.tvProfessionalSuggestion.text.toString())
+        }
+        binding.btnShareCasual.setOnClickListener {
+            shareText(binding.tvCasualSuggestion.text.toString())
+        }
+        binding.btnShareProfessional.setOnClickListener {
+            shareText(binding.tvProfessionalSuggestion.text.toString())
+        }
+        binding.btnTypeInput.setOnClickListener { showTypeInputDialog() }
     }
 
-    private fun checkPermissionAndListen() {
-        when {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED -> startListening()
-            shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> {
-                Snackbar.make(binding.root, "Microphone access needed to hear your speech.", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Grant") { requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
-                    .show()
-            }
-            else -> requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+    private fun handleMicClick() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            == PackageManager.PERMISSION_GRANTED) {
+            startListening()
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
     }
 
@@ -108,10 +114,8 @@ class MainActivity : AppCompatActivity() {
     private fun showIdleState() {
         binding.apply {
             tvStatusMessage.text = "Tap the mic and speak in Hindi, Marathi, or Hinglish"
-            fabMic.setImageResource(R.drawable.ic_mic)
-            progressBar.visibility = View.GONE
+            fabMic.text = "🎤 Speak"
             cardResult.visibility = View.GONE
-            lottieListening.visibility = View.GONE
             btnReset.visibility = View.GONE
         }
     }
@@ -119,85 +123,74 @@ class MainActivity : AppCompatActivity() {
     private fun showListeningState() {
         binding.apply {
             tvStatusMessage.text = "🎧 Listening... Speak now!"
-            fabMic.setImageResource(R.drawable.ic_mic_active)
-            lottieListening.visibility = View.VISIBLE
-            lottieListening.playAnimation()
+            fabMic.text = "⏹ Stop"
             cardResult.visibility = View.GONE
-            progressBar.visibility = View.GONE
         }
     }
 
     private fun showProcessingState() {
         binding.apply {
-            tvStatusMessage.text = "⚡ Processing your speech..."
-            lottieListening.visibility = View.GONE
-            progressBar.visibility = View.VISIBLE
-            cardResult.visibility = View.GONE
+            tvStatusMessage.text = "⏳ Processing..."
+            fabMic.text = "🎤 Speak"
         }
     }
 
-    private fun showResult(result: TranslationResult) {
+    private fun showResultState(result: TranslationResult) {
         binding.apply {
-            progressBar.visibility = View.GONE
-            lottieListening.visibility = View.GONE
-            cardResult.visibility = View.VISIBLE
-            btnReset.visibility = View.VISIBLE
-
-            tvDetectedInput.text = "🎧 "${result.detectedInput}""
-            tvDetectedLanguage.text = "🌐 ${result.detectedLanguage} • ${result.context.name.lowercase().replaceFirstChar { it.uppercase() }}"
-            tvCasualSuggestion.text = result.casualSuggestion
-            tvProfessionalSuggestion.text = result.professionalSuggestion
-
-            if (result.alternativeSuggestion.isNotEmpty()) {
-                tvAlternative.text = "🔁 ${result.alternativeSuggestion}"
-                tvAlternative.visibility = View.VISIBLE
-            } else {
-                tvAlternative.visibility = View.GONE
-            }
-
+            tvStatusMessage.text = "Translation ready!"
+            tvDetectedInput.text = "🎧 Detected: \"${result.originalText}\""
+            tvDetectedLanguage.text = "🌐 Language: ${result.detectedLanguage}"
+            tvCasualSuggestion.text = result.casualEnglish
+            tvProfessionalSuggestion.text = result.professionalEnglish
             if (result.meaning.isNotEmpty()) {
-                tvMeaning.text = "📝 ${result.meaning}"
+                tvMeaning.text = "🌐 Meaning: ${result.meaning}"
                 tvMeaning.visibility = View.VISIBLE
             } else {
                 tvMeaning.visibility = View.GONE
             }
-
-            tvStatusMessage.text = "✅ Suggestions ready!"
+            if (result.alternative.isNotEmpty()) {
+                tvAlternative.text = "🔁 Alternative: ${result.alternative}"
+                tvAlternative.visibility = View.VISIBLE
+            } else {
+                tvAlternative.visibility = View.GONE
+            }
+            cardResult.visibility = View.VISIBLE
+            btnReset.visibility = View.VISIBLE
+            fabMic.text = "🎤 Speak"
         }
     }
 
-    private fun showError(message: String) {
-        binding.progressBar.visibility = View.GONE
-        binding.lottieListening.visibility = View.GONE
-        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
-            .setAction("Try Again") { checkPermissionAndListen() }
-            .show()
-        viewModel.resetState()
+    private fun showErrorState(message: String) {
+        binding.apply {
+            tvStatusMessage.text = "Error occurred"
+            fabMic.text = "🎤 Speak"
+        }
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
     }
 
-    private fun copyToClipboard(text: String, label: String) {
+    private fun copyToClipboard(text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText(label, text))
-        Toast.makeText(this, "$label suggestion copied!", Toast.LENGTH_SHORT).show()
+        clipboard.setPrimaryClip(ClipData.newPlainText("English Suggestion", text))
+        Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT).show()
     }
 
     private fun shareText(text: String) {
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)
         }
-        startActivity(Intent.createChooser(shareIntent, "Share via"))
+        startActivity(Intent.createChooser(intent, "Share via"))
     }
 
-    private fun showTypedInputDialog() {
-        val editText = android.widget.EditText(this)
-        editText.hint = "Type in Hindi/Marathi/Hinglish..."
+    private fun showTypeInputDialog() {
+        val input = android.widget.EditText(this)
+        input.hint = "Type in Hindi, Marathi or Hinglish..."
         android.app.AlertDialog.Builder(this)
             .setTitle("Type your sentence")
-            .setView(editText)
+            .setView(input)
             .setPositiveButton("Translate") { _, _ ->
-                val input = editText.text.toString().trim()
-                if (input.isNotEmpty()) viewModel.onSpeechReceived(input)
+                val text = input.text.toString().trim()
+                if (text.isNotEmpty()) viewModel.processInput(text)
             }
             .setNegativeButton("Cancel", null)
             .show()
@@ -210,8 +203,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_history -> { startActivity(Intent(this, HistoryActivity::class.java)); true }
-            R.id.action_settings -> { startActivity(Intent(this, SettingsActivity::class.java)); true }
+            R.id.action_history -> {
+                startActivity(Intent(this, HistoryActivity::class.java))
+                true
+            }
+            R.id.action_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
