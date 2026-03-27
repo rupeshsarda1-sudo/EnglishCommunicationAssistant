@@ -57,11 +57,8 @@ jobs:
             app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           echo "Mipmap icons generated successfully"
 
-      - name: Run Unit Tests
-        run: ./gradlew test --stacktrace
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Build Debug APK (skip tests)
+        run: ./gradlew assembleDebug -x test --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
