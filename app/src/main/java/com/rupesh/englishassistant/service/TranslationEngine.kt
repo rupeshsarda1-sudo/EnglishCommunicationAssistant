@@ -246,7 +246,7 @@ class TranslationEngine {
     private fun generateFallback(text: String): PhraseEntry {
         return PhraseEntry(
             meaning = "Your statement",
-            casual = ""$text"",
+                        casual = "\"$text\"",
             professional = "Could you rephrase this professionally?",
             alternative = "Try speaking clearly and I'll suggest English alternatives."
         )
