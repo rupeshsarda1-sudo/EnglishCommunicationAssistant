@@ -36,74 +36,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="@color/surface">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:gravity="center">
-
-                    <com.airbnb.lottie.LottieAnimationView
-                        android:id="@+id/lottieListening"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        app:lottie_rawRes="@raw/listening_animation"
-                        app:lottie_autoPlay="false"
-                        app:lottie_loop="true"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/tvStatusMessage"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tap the mic and speak in Hindi, Marathi, or Hinglish"
-                        android:textSize="15sp"
-                        android:gravity="center"
-                        android:textColor="@color/text_secondary"
-                        android:layout_marginTop="8dp"/>
-
-                    <ProgressBar
-                        android:id="@+id/progressBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        android:layout_marginTop="8dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:layout_marginTop="16dp">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnTypedInput"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="⌨ Type"
-                            app:cornerRadius="24dp"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:textColor="@color/primary"
-                            android:layout_marginEnd="8dp"/>
-
-                    </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Result Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardResult"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:visibility="gone"
-                app:cardElevation="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="@color/surface">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -112,21 +46,29 @@
                     android:padding="20dp">
 
                     <TextView
-                        android:id="@+id/tvDetectedInput"
+                        android:id="@+id/tvStatusMessage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:text="Tap the mic and speak in Hindi, Marathi, or Hinglish"
                         android:textSize="15sp"
                         android:textStyle="italic"
                         android:textColor="@color/text_primary"
                         android:paddingBottom="4dp"/>
 
                     <TextView
-                        android:id="@+id/tvDetectedLanguage"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tvDetectedInput"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="12sp"
                         android:textColor="@color/accent"
                         android:paddingBottom="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tvDetectedLanguage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="@color/accent"/>
 
                     <TextView
                         android:id="@+id/tvMeaning"
@@ -144,48 +86,29 @@
                         android:text="💬 Casual English"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary"
-                        android:paddingBottom="4dp"/>
-
-                    <TextView
-                        android:id="@+id/tvCasualSuggestion"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="17sp"
-                        android:textColor="@color/casual_color"
-                        android:textStyle="bold"
-                        android:paddingBottom="8dp"/>
+                        android:fontFamily="sans-serif-light"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingBottom="16dp">
-
-                        <com.google.android.material.button.MaterialButton
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/tvCasualSuggestion"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_secondary"/>
+                        <TextView
                             android:id="@+id/btnCopyCasual"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Copy"
-                            android:textSize="12sp"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            app:cornerRadius="20dp"
-                            android:layout_marginEnd="8dp"/>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnShareCasual"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Share"
-                            android:textSize="12sp"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            app:cornerRadius="20dp"/>
+                            android:text="📋 Copy"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_secondary"
+                            android:fontFamily="sans-serif-light"
+                            android:visibility="gone"/>
                     </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider"
-                        android:layout_marginBottom="16dp"/>
 
                     <!-- Professional Suggestion -->
                     <TextView
@@ -194,28 +117,31 @@
                         android:text="🧑‍💼 Professional English"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary"
-                        android:paddingBottom="4dp"/>
+                        android:fontFamily="sans-serif-light"
+                        android:paddingTop="8dp"/>
 
-                    <TextView
-                        android:id="@+id/tvProfessionalSuggestion"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="17sp"
-                        android:textColor="@color/professional_color"
-                        android:textStyle="bold"
-                        android:paddingBottom="8dp"/>
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/tvProfessionalSuggestion"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_secondary"/>
+                        <TextView
+                            android:id="@+id/btnCopyProfessional"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📋 Copy"
+                            android:textSize="11sp"
+                            android:textColor="@color/text_secondary"
+                            android:fontFamily="sans-serif-light"
+                            android:visibility="gone"/>
+                    </LinearLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCopyProfessional"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Copy"
-                        android:textSize="12sp"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        app:cornerRadius="20dp"
-                        android:layout_marginBottom="12dp"/>
-
-                    <!-- Alternative -->
                     <TextView
                         android:id="@+id/tvAlternative"
                         android:layout_width="match_parent"
@@ -227,14 +153,49 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Result Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnShareCasual"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Share Casual"
+                        style="@style/Widget.Material3.Button.TextButton"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnShareProfessional"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Share Pro"
+                        style="@style/Widget.Material3.Button.TextButton"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReset"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🔄 Try Another"
-                app:cornerRadius="24dp"
-                android:layout_marginBottom="100dp"
+                android:text="🔁 Try Another"
                 android:visibility="gone"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTypeInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⌨️ Type Instead"
+                style="@style/Widget.Material3.Button.OutlinedButton"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -246,10 +207,7 @@
         android:layout_gravity="bottom|center"
         android:layout_margin="24dp"
         android:text="🎤 Speak"
-        app:icon="@drawable/ic_mic"
-        app:layout_anchorGravity="bottom|center"
-        android:backgroundTint="@color/primary"
         android:textColor="@android:color/white"
-        app:iconTint="@android:color/white"/>
+        android:backgroundTint="@color/primary"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
